@@ -1,0 +1,72 @@
+name: 🔒 Security Audit
+
+on:
+  schedule:
+    # Exécuter tous les lundis à 9h UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'app-lecture/package*.json'
+
+env:
+  WORKING_DIRECTORY: './app-lecture'
+
+jobs:
+  security-audit:
+    name: 🔒 Security & Dependencies Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/package-lock.json
+        
+    - name: 📥 Install dependencies
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm ci
+      
+    - name: 🔍 Audit vulnerabilities
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm audit --audit-level=moderate
+      
+    - name: 🔒 Run Snyk security scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --working-directory=${{ env.WORKING_DIRECTORY }} --severity-threshold=high
+        
+    - name: 📊 Check bundle size
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: |
+        npm run build
+        npx @next/bundle-analyzer .next/server/pages-manifest.json || true
+        
+    - name: 🧹 Check outdated packages
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm outdated || true
+      
+    - name: 📝 Create security report
+      if: always()
+      run: |
+        echo "## 🔒 Security Audit Report" > security-report.md
+        echo "Date: $(date)" >> security-report.md
+        echo "" >> security-report.md
+        echo "### npm audit results:" >> security-report.md
+        cd ${{ env.WORKING_DIRECTORY }} && npm audit --json | jq -r '.metadata | "Found \(.vulnerabilities.total) vulnerabilities (\(.vulnerabilities.high) high, \(.vulnerabilities.moderate) moderate, \(.vulnerabilities.low) low)"' >> ../security-report.md || echo "Audit completed" >> ../security-report.md
+        
+    - name: 📤 Upload security report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-report
+        path: security-report.md
+        retention-days: 30

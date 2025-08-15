@@ -1,0 +1,150 @@
+name: 🚀 CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'app-lecture/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'app-lecture/**'
+  
+  # Permettre l'exécution manuelle
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  WORKING_DIRECTORY: './app-lecture'
+
+jobs:
+  # 🧪 Tests et vérifications qualité
+  test:
+    name: 🧪 Tests & Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: ${{ env.WORKING_DIRECTORY }}/package-lock.json
+        
+    - name: 📥 Install dependencies
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm ci
+      
+    - name: 🔍 Lint check
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm run lint
+      
+    - name: 📝 Type check
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm run type-check
+      
+    - name: 🧪 Run tests
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm run test --if-present
+      
+    - name: 📊 Build application
+      working-directory: ${{ env.WORKING_DIRECTORY }}
+      run: npm run build
+      env:
+        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+        
+    - name: 📤 Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: next-build
+        path: ${{ env.WORKING_DIRECTORY }}/.next
+        retention-days: 1
+
+  # 🚀 Déploiement sur Vercel
+  deploy:
+    name: 🚀 Deploy to Vercel
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🚀 Deploy to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        vercel-args: '--prod'
+        
+    - name: 📝 Comment deployment URL
+      uses: actions/github-script@v7
+      if: github.event_name == 'push'
+      with:
+        script: |
+          github.rest.repos.createCommitComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            commit_sha: context.sha,
+            body: '🚀 Application déployée avec succès!\n\n📱 Lien de démo: https://enaa-litteratie.vercel.app'
+          })
+
+  # 🏷️ Release automatique (tags)
+  release:
+    name: 🏷️ Create Release
+    needs: [test, deploy]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: 🏷️ Generate tag
+      id: tag
+      run: |
+        VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
+        echo "version=v${VERSION}" >> $GITHUB_OUTPUT
+        
+    - name: 📝 Generate changelog
+      id: changelog
+      run: |
+        CHANGELOG=$(git log --oneline -10 --pretty=format:"- %s (%h)")
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+        
+    - name: 🎉 Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.tag.outputs.version }}
+        release_name: 'Release ${{ steps.tag.outputs.version }}'
+        body: |
+          ## 🚀 Nouvelles fonctionnalités
+          
+          ${{ steps.changelog.outputs.changelog }}
+          
+          ## 📱 Démo
+          
+          L'application est disponible à l'adresse : https://enaa-litteratie.vercel.app
+          
+          ## 🧪 Tests
+          
+          - ✅ Tests unitaires passés
+          - ✅ Vérifications TypeScript
+          - ✅ Lint validé
+          - ✅ Build réussi
+        draft: false
+        prerelease: false
