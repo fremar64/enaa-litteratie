@@ -21,7 +21,7 @@ Cette application implémente une **méthode syllabique pure** avec une progress
 - **Node.js** 18+ 
 - **npm** 10+
 - **Git**
-- **Compte Supabase** (gratuit)
+- **Compte Supabase** (gratuit) - optionnel pour le mode démo
 
 ## 🚀 Installation rapide
 
@@ -30,67 +30,58 @@ Cette application implémente une **méthode syllabique pure** avec une progress
 git clone [URL_REPO]
 cd app-lecture
 
-# Setup automatique
-./setup-dev.sh
-```
-
-Le script setup automatique va :
-1. ✅ Vérifier les prérequis
-2. ✅ Installer les dépendances
-3. ✅ Configurer l'environnement
-4. ✅ Initialiser Supabase
-5. ✅ Construire l'application
-6. ✅ Démarrer le serveur de développement
-
-## ⚙️ Configuration manuelle
-
-### 1. Installation des dépendances
-
-```bash
+# Installation des dépendances
 npm install
+
+# Démarrage en mode démo (sans Supabase)
+npm run dev
 ```
 
-### 2. Configuration de l'environnement
+L'application fonctionnera immédiatement en **mode démonstration** avec des données factices.
+
+## 🔧 Configuration Supabase (Optionnelle)
+
+Pour activer la persistance des données et l'authentification :
+
+### 1. Création du projet Supabase
+
+Suivre le guide détaillé : **[SUPABASE-GUIDE.md](./SUPABASE-GUIDE.md)**
+
+### 2. Configuration rapide
 
 ```bash
-# Copier le fichier d'exemple
-cp .env.example .env.local
+# Copier le template
+cp .env.local.example .env.local
 
-# Éditer avec vos clés
+# Éditer avec vos clés Supabase
 nano .env.local
 ```
 
-Variables requises :
+Variables à configurer :
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=https://votre-projet.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=votre-cle-anon
-SUPABASE_SERVICE_ROLE_KEY=votre-cle-service-role
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...votre-cle-anon
 ```
 
-### 3. Configuration Supabase
+### 3. Test de configuration
 
-```bash
-# Installer Supabase CLI
-npm install -g @supabase/cli
+Aller sur `/test-supabase` dans l'application pour vérifier la configuration.
 
-# Lien avec votre projet
-supabase login
-supabase link --project-ref VOTRE_PROJECT_ID
+## ⚙️ Modes de fonctionnement
 
-# Appliquer les migrations
-supabase db push
-```
+### Mode Démonstration (par défaut)
+- ✅ Aucune configuration requise
+- ✅ Données factices intégrées
+- ✅ Toutes les fonctionnalités accessibles
+- ❌ Pas de sauvegarde de progression
+- ❌ Pas d'authentification
 
-### 4. Démarrage
-
-```bash
-# Développement
-npm run dev
-
-# Production
-npm run build
-npm start
-```
+### Mode Production (avec Supabase)
+- ✅ Authentification utilisateur
+- ✅ Sauvegarde de progression
+- ✅ Suivi analytics détaillé
+- ✅ Gestion multi-utilisateurs
+- ✅ Historique des sessions
 
 ## 🏗️ Architecture
 

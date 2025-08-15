@@ -193,6 +193,16 @@ export default function HomePage() {
 
           <div className="mt-6 text-center text-sm text-gray-500">
             <p>Première fois ? Ton compte sera créé automatiquement !</p>
+            <div className="mt-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => router.push('/test-supabase')}
+                className="text-xs"
+              >
+                🔧 Test Configuration Supabase
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
