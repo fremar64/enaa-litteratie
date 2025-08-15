@@ -1,0 +1,75 @@
+# Dépendances
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js
+.next/
+out/
+build/
+
+# Cache Vercel
+.vercel
+
+# Variables d'environnement
+.env
+.env*.local
+!.env.example
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Cache directories
+.npm
+.eslintcache
+
+# Temporary folders
+tmp/
+temp/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Supabase
+.supabase/
+
+# Fichiers système Windows
+*.Zone.Identifier
+
+# Packages binaires
+*.deb
+*.rpm
+*.dmg
+*.pkg
+
+# Captures d'écran temporaires
+screencapture-*
+
+# Scripts de configuration système
+setup-*.sh
+!app-lecture/setup-dev.sh
+!app-lecture/fix-issues.sh
