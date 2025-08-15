@@ -1,36 +1,7 @@
 {
-  "version": 2,
-  "name": "enaa-litteratie",
-  "builds": [
-    {
-      "src": "app-lecture/package.json",
-      "use": "@vercel/next",
-      "config": {
-        "outputDirectory": "app-lecture/.next"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "app-lecture/$1"
-    }
-  ],
-  "functions": {
-    "app-lecture/src/app/**/*.ts": {
-      "runtime": "nodejs18.x"
-    }
-  },
-  "env": {
-    "NODE_ENV": "production",
-    "NEXT_PUBLIC_APP_URL": "https://enaa-litteratie.vercel.app"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key"
-    }
-  },
+  "buildCommand": "cd app-lecture && npm run build",
+  "outputDirectory": "app-lecture/.next",
+  "installCommand": "cd app-lecture && npm install",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
@@ -75,12 +46,6 @@
       "source": "/demo",
       "destination": "/?demo=true",
       "permanent": false
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
     }
   ]
 }
