@@ -161,6 +161,8 @@ Ce projet est sous licence [MIT](LICENSE).
 
 ---
 
-**🎉 Application fonctionnelle et prête à être testée !**
+**🎉 Application fonctionnelle et déployée !**
+
+🌐 **Démo en ligne :** https://enaa-litteratie.ceredis.net
 
 Pour toute question ou suggestion, ouvrir une [issue](https://github.com/fremar64/enaa-litteratie/issues).

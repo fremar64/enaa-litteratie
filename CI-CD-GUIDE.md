@@ -87,7 +87,7 @@ cd /home/ceredis/enaa-litteratie
 
 ### **URLs à surveiller :**
 - **Actions GitHub :** https://github.com/fremar64/enaa-litteratie/actions
-- **Application Live :** https://enaa-litteratie.vercel.app (après config)
+- **Application Live :** https://enaa-litteratie.ceredis.net
 - **Vercel Dashboard :** https://vercel.com/dashboard
 
 ### **Notifications :**
