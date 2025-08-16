@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,36 @@ import { DemoSection } from '@/components/ui/demo-section'
 import { AnimatedIcon, FloatingElement, MagicButton } from '@/components/ui/animated-elements'
 import { useAppStore } from '@/stores/appStore'
 import { createClient } from '@/lib/supabase/client'
+
+// Hook pour détection connexion lente (spécifique Congo)
+function useConnectionQuality() {
+  const [connectionQuality, setConnectionQuality] = useState<'fast' | 'slow' | 'offline'>('fast')
+  
+  useEffect(() => {
+    const connection = (navigator as any).connection
+    if (connection) {
+      const updateConnectionQuality = () => {
+        const effectiveType = connection.effectiveType
+        if (effectiveType === 'slow-2g' || effectiveType === '2g') {
+          setConnectionQuality('slow')
+        } else if (effectiveType === '3g') {
+          setConnectionQuality('slow')
+        } else {
+          setConnectionQuality('fast')
+        }
+      }
+      
+      updateConnectionQuality()
+      connection.addEventListener('change', updateConnectionQuality)
+      
+      return () => {
+        connection.removeEventListener('change', updateConnectionQuality)
+      }
+    }
+  }, [])
+  
+  return connectionQuality
+}
 
 export default function HomePage() {
   const [nom, setNom] = useState('')
@@ -22,6 +52,7 @@ export default function HomePage() {
   const { setUser, setAuthenticated, user, isAuthenticated } = useAppStore()
   const router = useRouter()
   const supabase = createClient()
+  const connectionQuality = useConnectionQuality()
 
   // Redirection si déjà connecté
   useEffect(() => {
@@ -29,6 +60,11 @@ export default function HomePage() {
       router.push('/eleve')
     }
   }, [isAuthenticated, user, router])
+
+  // Optimisation animations selon connexion Congo
+  const shouldUseAnimations = useMemo(() => {
+    return connectionQuality === 'fast'
+  }, [connectionQuality])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,18 +82,33 @@ export default function HomePage() {
         throw new Error('L\'âge doit être entre 3 et 12 ans')
       }
 
-      // Authentification simplifiée (création automatique si n'existe pas)
-      const email = `${nom.toLowerCase().replace(/\s+/g, '')}@classe-${codeClasse}.local`
+      // Email simplifié pour l'Afrique (pas de caractères spéciaux)
+      const email = `${nom.toLowerCase().replace(/[^a-z]/g, '')}@classe${codeClasse.toLowerCase()}.enaa`
       
-      // Tentative de connexion
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      // Tentative de connexion avec timeout adapté Congo
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Connexion trop lente. Réessayez.')), 
+        connectionQuality === 'slow' ? 15000 : 10000)
+      )
+
+      const authPromise = supabase.auth.signInWithPassword({
         email,
         password: codeClasse // Mot de passe = code classe pour simplifier
       })
 
+      const { data: authData, error: authError } = await Promise.race([
+        authPromise,
+        timeoutPromise
+      ]) as any
+
       if (authError && authError.message.includes('Invalid login credentials')) {
-        // Création automatique du compte si n'existe pas
-        const { data: signupData, error: signupError } = await supabase.auth.signUp({
+        // Création automatique du compte si n'existe pas (avec timeout Congo)
+        const signupTimeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Création compte trop lente. Réessayez.')), 
+          connectionQuality === 'slow' ? 20000 : 15000)
+        )
+
+        const signupPromise = supabase.auth.signUp({
           email,
           password: codeClasse,
           options: {
@@ -68,6 +119,11 @@ export default function HomePage() {
             }
           }
         })
+
+        const { data: signupData, error: signupError } = await Promise.race([
+          signupPromise,
+          signupTimeoutPromise
+        ]) as any
 
         if (signupError) throw signupError
 
@@ -108,7 +164,18 @@ export default function HomePage() {
 
     } catch (err: any) {
       console.error('Erreur connexion:', err)
-      setError(err.message || 'Erreur de connexion')
+      
+      // Messages d'erreur adaptés Congo
+      let errorMessage = 'Erreur de connexion'
+      if (err.message?.includes('trop lente')) {
+        errorMessage = connectionQuality === 'slow' 
+          ? 'Connexion lente détectée. Réessayez dans un moment.'
+          : 'Connexion interrompue. Vérifiez votre réseau.'
+      } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+        errorMessage = 'Problème de réseau. Vérifiez votre connexion Internet.'
+      }
+      
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -129,14 +196,37 @@ export default function HomePage() {
   if (!showForm) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-200 relative overflow-hidden">
+        {/* Indicateur de connexion Congo */}
+        <div className="absolute top-4 right-4 z-20">
+          <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs ${
+            connectionQuality === 'fast' ? 'bg-green-100 text-green-700' :
+            connectionQuality === 'slow' ? 'bg-yellow-100 text-yellow-700' :
+            'bg-red-100 text-red-700'
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${
+              connectionQuality === 'fast' ? 'bg-green-500' :
+              connectionQuality === 'slow' ? 'bg-yellow-500' :
+              'bg-red-500'
+            }`}></div>
+            <span>
+              {connectionQuality === 'fast' ? 'Connexion rapide' :
+               connectionQuality === 'slow' ? 'Connexion lente' :
+               'Hors ligne'}
+            </span>
+          </div>
+        </div>
+
         {/* Éléments décoratifs flottants */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-20 left-10 text-6xl animate-bounce">🌟</div>
-          <div className="absolute top-32 right-20 text-5xl animate-pulse">📚</div>
-          <div className="absolute bottom-40 left-20 text-4xl animate-bounce delay-300">🎨</div>
-          <div className="absolute bottom-20 right-32 text-5xl animate-pulse delay-500">✨</div>
-          <div className="absolute top-1/2 left-5 text-3xl animate-spin slow">🌈</div>
-          <div className="absolute top-1/3 right-10 text-4xl animate-bounce delay-700">🦋</div>
+        <div className="absolute inset-0 pointer-events-none">{shouldUseAnimations && (
+          <>
+            <div className="absolute top-20 left-10 text-6xl animate-bounce">🌟</div>
+            <div className="absolute top-32 right-20 text-5xl animate-pulse">📚</div>
+            <div className="absolute bottom-40 left-20 text-4xl animate-bounce delay-300">🎨</div>
+            <div className="absolute bottom-20 right-32 text-5xl animate-pulse delay-500">✨</div>
+            <div className="absolute top-1/2 left-5 text-3xl animate-spin slow">🌈</div>
+            <div className="absolute top-1/3 right-10 text-4xl animate-bounce delay-700">🦋</div>
+          </>
+        )}
         </div>
 
         <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
