@@ -75,13 +75,44 @@ module.exports = {
           "0%": { transform: "translateX(-100px)", opacity: "0" },
           "50%": { transform: "translateX(0)", opacity: "0.5" },
           "100%": { transform: "translateX(0)", opacity: "1" }
+        },
+        "float": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-20px)" }
+        },
+        "rainbow": {
+          "0%": { filter: "hue-rotate(0deg)" },
+          "100%": { filter: "hue-rotate(360deg)" }
+        },
+        "spin-slow": {
+          "from": { transform: "rotate(0deg)" },
+          "to": { transform: "rotate(360deg)" }
+        },
+        "wiggle": {
+          "0%, 7%": { transform: "rotateZ(0)" },
+          "15%": { transform: "rotateZ(-15deg)" },
+          "20%": { transform: "rotateZ(10deg)" },
+          "25%": { transform: "rotateZ(-10deg)" },
+          "30%": { transform: "rotateZ(6deg)" },
+          "35%": { transform: "rotateZ(-4deg)" },
+          "40%, 100%": { transform: "rotateZ(0)" }
+        },
+        "gradient-shift": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" }
         }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "phoneme-bounce": "phoneme-bounce 1s infinite",
-        "syllable-form": "syllable-form 0.8s ease-out"
+        "syllable-form": "syllable-form 0.8s ease-out",
+        "float": "float 3s ease-in-out infinite",
+        "rainbow": "rainbow 3s linear infinite",
+        "spin-slow": "spin-slow 8s linear infinite",
+        "wiggle": "wiggle 2s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 8s ease infinite"
       },
       fontFamily: {
         'dyslexic': ['OpenDyslexic', 'sans-serif'],
