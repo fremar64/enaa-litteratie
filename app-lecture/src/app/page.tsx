@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DemoSection } from '@/components/ui/demo-section'
-import { AnimatedIcon, FloatingElement, MagicButton } from '@/components/ui/animated-elements'
+import { SponsorCarousel } from '@/components/ui/sponsor-carousel'
+import { AnimatedIcon } from '@/components/ui/animated-elements'
 import { useAppStore } from '@/stores/appStore'
 import { createClient } from '@/lib/supabase/client'
 
@@ -61,10 +63,10 @@ export default function HomePage() {
     }
   }, [isAuthenticated, user, router])
 
-  // Optimisation animations selon connexion Congo
-  const shouldUseAnimations = useMemo(() => {
-    return connectionQuality === 'fast'
-  }, [connectionQuality])
+  // Optimisation animations selon connexion Congo (utilisé pour les optimisations futures)
+  // const shouldUseAnimations = useMemo(() => {
+  //   return connectionQuality === 'fast'
+  // }, [connectionQuality])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,7 +98,7 @@ export default function HomePage() {
         password: codeClasse // Mot de passe = code classe pour simplifier
       })
 
-      const { data: authData, error: authError } = await Promise.race([
+      const { error: authError } = await Promise.race([
         authPromise,
         timeoutPromise
       ]) as any
@@ -192,126 +194,230 @@ export default function HomePage() {
     return 'CM2'
   }
 
-  // Interface d'accueil principale
+  // Interface d'accueil principale NOUVELLE VERSION
   if (!showForm) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-200 relative overflow-hidden">
-        {/* Indicateur de connexion Congo */}
-        <div className="absolute top-4 right-4 z-20">
-          <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs ${
-            connectionQuality === 'fast' ? 'bg-green-100 text-green-700' :
-            connectionQuality === 'slow' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-red-100 text-red-700'
-          }`}>
-            <div className={`w-2 h-2 rounded-full ${
-              connectionQuality === 'fast' ? 'bg-green-500' :
-              connectionQuality === 'slow' ? 'bg-yellow-500' :
-              'bg-red-500'
-            }`}></div>
-            <span>
-              {connectionQuality === 'fast' ? 'Connexion rapide' :
-               connectionQuality === 'slow' ? 'Connexion lente' :
-               'Hors ligne'}
-            </span>
-          </div>
-        </div>
-
-        {/* Éléments décoratifs flottants */}
-        <div className="absolute inset-0 pointer-events-none">{shouldUseAnimations && (
-          <>
-            <div className="absolute top-20 left-10 text-6xl animate-bounce">🌟</div>
-            <div className="absolute top-32 right-20 text-5xl animate-pulse">📚</div>
-            <div className="absolute bottom-40 left-20 text-4xl animate-bounce delay-300">🎨</div>
-            <div className="absolute bottom-20 right-32 text-5xl animate-pulse delay-500">✨</div>
-            <div className="absolute top-1/2 left-5 text-3xl animate-spin slow">🌈</div>
-            <div className="absolute top-1/3 right-10 text-4xl animate-bounce delay-700">🦋</div>
-          </>
-        )}
-        </div>
-
-        <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
-          {/* Titre principal avec animation */}
-          <div className="text-center mb-12">
-            <h1 className="text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 animate-pulse mb-4">
-              📖 MagicLecture
-            </h1>
-            <p className="text-2xl md:text-3xl font-bold text-gray-700 mb-6">
-              Apprends à lire en t'amusant ! 🎉
-            </p>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Découvre le monde magique des lettres et des mots avec notre méthode syllabique amusante !
-            </p>
+      <div className="min-h-screen">
+        {/* Section Hero avec background-image */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Background image */}
+          <div className="absolute inset-0 z-0">
+            <Image
+              src="/e-school_accueil2.jpg"
+              alt="Enfants apprenant avec des ordinateurs"
+              fill
+              className="object-cover"
+              priority
+            />
+            {/* Overlay gradient pour améliorer la lisibilité */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/70 via-purple-900/60 to-transparent"></div>
           </div>
 
-          {/* Bouton d'entrée principal */}
-          <div className="mb-12">
-            <Button
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-2xl font-bold py-6 px-12 rounded-full shadow-2xl transform hover:scale-105 transition-all duration-300 animate-pulse"
-            >
-              🚀 Commencer l'aventure !
-            </Button>
-          </div>
-
-          {/* Cartes de présentation */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
-            <Card className="bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 transform hover:scale-105 border-2 border-purple-200">
-              <CardContent className="text-center p-6">
-                <div className="text-5xl mb-4">🎯</div>
-                <h3 className="text-xl font-bold text-purple-600 mb-2">Méthode Syllabique</h3>
-                <p className="text-gray-600">Apprends étape par étape avec une méthode éprouvée</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 transform hover:scale-105 border-2 border-pink-200">
-              <CardContent className="text-center p-6">
-                <div className="text-5xl mb-4">🎮</div>
-                <h3 className="text-xl font-bold text-pink-600 mb-2">Jeux Interactifs</h3>
-                <p className="text-gray-600">Des activités amusantes pour chaque apprentissage</p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/80 backdrop-blur-sm hover:bg-white/90 transition-all duration-300 transform hover:scale-105 border-2 border-blue-200">
-              <CardContent className="text-center p-6">
-                <div className="text-5xl mb-4">📊</div>
-                <h3 className="text-xl font-bold text-blue-600 mb-2">Suivi Personnel</h3>
-                <p className="text-gray-600">Ta progression est sauvegardée automatiquement</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Section âges */}
-          <div className="text-center">
-            <h3 className="text-2xl font-bold text-gray-700 mb-4">Pour tous les âges !</h3>
-            <div className="flex flex-wrap justify-center gap-4">
-              {[
-                { age: '3-4 ans', niveau: 'Petite Section', emoji: '�', color: 'bg-yellow-200' },
-                { age: '5-6 ans', niveau: 'Grande Section', emoji: '👧', color: 'bg-green-200' },
-                { age: '6-7 ans', niveau: 'CP', emoji: '🧒', color: 'bg-blue-200' },
-                { age: '8+ ans', niveau: 'CE1 et +', emoji: '👦', color: 'bg-purple-200' }
-              ].map((item, index) => (
-                <div
-                  key={index}
-                  className={`${item.color} rounded-full px-4 py-2 flex items-center gap-2 font-semibold text-gray-700`}
-                >
-                  <span className="text-xl">{item.emoji}</span>
-                  <span>{item.age}</span>
-                </div>
-              ))}
+          {/* Indicateur de connexion Congo */}
+          <div className="absolute top-4 right-4 z-20">
+            <div className={`flex items-center space-x-2 px-3 py-1 rounded-full text-xs backdrop-blur-sm ${
+              connectionQuality === 'fast' ? 'bg-green-100/90 text-green-700' :
+              connectionQuality === 'slow' ? 'bg-yellow-100/90 text-yellow-700' :
+              'bg-red-100/90 text-red-700'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${
+                connectionQuality === 'fast' ? 'bg-green-500' :
+                connectionQuality === 'slow' ? 'bg-yellow-500' :
+                'bg-red-500'
+              }`}></div>
+              <span>
+                {connectionQuality === 'fast' ? 'Connexion rapide' :
+                 connectionQuality === 'slow' ? 'Connexion lente' :
+                 'Hors ligne'}
+              </span>
             </div>
           </div>
 
-          {/* Bouton démo en bas */}
-          <div className="mt-16">
-            <Button 
-              variant="outline" 
-              onClick={() => router.push('/test-supabase')}
-              className="text-gray-600 border-gray-300 hover:bg-gray-50"
-            >
-              🔧 Mode développeur
-            </Button>
+          {/* Contenu principal */}
+          <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
+            {/* Logo CEREDIS */}
+            <div className="mb-8">
+              <Image
+                src="/Logo_ceredis.png"
+                alt="Logo CEREDIS"
+                width={300}
+                height={120}
+                className="mx-auto"
+                priority
+              />
+            </div>
+
+            {/* Titre principal */}
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 drop-shadow-lg">
+              Bienvenue sur
+              <br />
+              <span className="text-cyan-300">ENAA Littératie</span>
+            </h1>
+
+            {/* Sous-titre */}
+            <p className="text-xl md:text-2xl mb-8 font-medium drop-shadow-md max-w-3xl mx-auto">
+              Une application d'apprentissage scolaire qui s'inscrit dans le courant 
+              de l'éducation basée sur les preuves
+            </p>
+
+            {/* Boutons d'action */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+              <Button
+                onClick={() => setShowForm(true)}
+                size="lg"
+                className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold px-8 py-4 text-lg rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+              >
+                Découvrir
+              </Button>
+              
+              <Button
+                onClick={() => router.push('/test-supabase')}
+                variant="outline"
+                size="lg"
+                className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 font-semibold px-8 py-4 text-lg rounded-full"
+              >
+                Commencer
+              </Button>
+            </div>
+
+            {/* Points clés */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+              <div className="text-center">
+                <div className="text-4xl mb-4">📚</div>
+                <h3 className="text-xl font-semibold mb-2">Méthode Syllabique</h3>
+                <p className="text-white/90">Apprentissage progressif et structuré</p>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="text-xl font-semibold mb-2">Adaptatif</h3>
+                <p className="text-white/90">Personnalisé selon les besoins de chaque enfant</p>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl mb-4">🌍</div>
+                <h3 className="text-xl font-semibold mb-2">Congo Brazzaville</h3>
+                <p className="text-white/90">Optimisé pour les connexions locales</p>
+              </div>
+            </div>
           </div>
-        </div>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
+            <div className="animate-bounce">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+          </div>
+        </section>
+
+        {/* Section présentation */}
+        <section className="py-20 bg-white">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold text-gray-800 mb-6">
+                La transformation numérique de l'éducation
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Arith-play-game est un environnement numérique développé pour 
+                l'apprentissage et le déploiement des technologies élémentaires.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-6">
+                  Découvrez ce que tu peux apprendre
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div className="text-center p-6 bg-blue-50 rounded-xl">
+                    <div className="text-3xl mb-3">📊</div>
+                    <h4 className="font-semibold text-gray-800">Numération</h4>
+                    <p className="text-sm text-gray-600">Apprends à découvrir et à reconnaître les nombres</p>
+                  </div>
+                  
+                  <div className="text-center p-6 bg-green-50 rounded-xl">
+                    <div className="text-3xl mb-3">📖</div>
+                    <h4 className="font-semibold text-gray-800">Calcul</h4>
+                    <p className="text-sm text-gray-600">Découvre l'addition et la soustraction avec nous</p>
+                  </div>
+                  
+                  <div className="text-center p-6 bg-purple-50 rounded-xl">
+                    <div className="text-3xl mb-3">👥</div>
+                    <h4 className="font-semibold text-gray-800">Collaboration</h4>
+                    <p className="text-sm text-gray-600">Travaille avec tes camarades et tes enseignants</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button 
+                    onClick={() => setShowForm(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Pour les enseignants
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => setShowForm(true)}
+                    className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                  >
+                    Pour les élèves
+                  </Button>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-8 text-center">
+                  <div className="text-6xl mb-4">🎓</div>
+                  <h4 className="text-2xl font-bold text-gray-800 mb-4">
+                    Prêt à apprendre en s'amusant ?
+                  </h4>
+                  <p className="text-gray-600 mb-6">
+                    Rejoins les milliers d'élèves qui progressent chaque jour grâce à Arith-play-game !
+                  </p>
+                  <div className="bg-yellow-100 rounded-full px-4 py-2 inline-block">
+                    <span className="text-yellow-800 font-semibold">🎯 123 élèves en ligne</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Carrousel des sponsors */}
+        <SponsorCarousel />
+
+        {/* Section CTA finale */}
+        <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white text-center">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-4xl font-bold mb-6">
+              Prêt à commencer l'aventure ?
+            </h2>
+            <p className="text-xl mb-8 opacity-90">
+              Rejoins notre programme d'apprentissage basé sur les preuves et 
+              développe tes compétences à ton rythme.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => setShowForm(true)}
+                size="lg"
+                className="bg-white text-blue-600 hover:bg-gray-100 font-bold px-8 py-4 text-lg rounded-full"
+              >
+                Commencer maintenant
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-white text-white hover:bg-white/10 font-semibold px-8 py-4 text-lg rounded-full"
+                onClick={() => router.push('/test-supabase')}
+              >
+                🎮 Mode démonstration
+              </Button>
+            </div>
+          </div>
+        </section>
       </div>
     )
   }
