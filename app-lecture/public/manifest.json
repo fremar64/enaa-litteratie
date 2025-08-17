@@ -1,0 +1,72 @@
+{
+  "name": "ENAA Lecture - Congo Brazzaville",
+  "short_name": "ENAA Lecture",
+  "description": "Application d'apprentissage de la lecture optimisée pour le Congo Brazzaville",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f0f9ff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "categories": ["education", "kids", "africa"],
+  "lang": "fr-CG",
+  
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  
+  "protocol_handlers": [
+    {
+      "protocol": "web+enaa",
+      "url": "/?action=%s"
+    }
+  ],
+  
+  "shortcuts": [
+    {
+      "name": "Commencer lecture",
+      "short_name": "Lecture",
+      "description": "Démarrer l'apprentissage de lecture",
+      "url": "/eleve",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  
+  "related_applications": [],
+  
+  "scope": "/",
+  "id": "enaa-lecture-congo",
+  
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
+}

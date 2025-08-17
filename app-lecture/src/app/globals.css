@@ -328,3 +328,40 @@
     display: none !important;
   }
 }
+
+/* ============================================
+   🇨🇬 SPINNER ET CHARGEMENT CONGO
+   ============================================ */
+
+/* Spinner de chargement Congo */
+.congo-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid var(--congo-primary, #3b82f6);
+  border-radius: 50%;
+  animation: congo-spin 1s linear infinite;
+}
+
+@keyframes congo-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Optimisations chargement pour connexions lentes */
+.congo-loading-slow .congo-loading-spinner {
+  animation-duration: 1.5s; /* Plus lent pour économiser CPU */
+}
+
+/* Désactiver animations en mode faible bande passante */
+@media (prefers-reduced-motion: reduce) {
+  .congo-loading-spinner {
+    animation: none;
+    border-top-color: var(--congo-primary, #3b82f6);
+  }
+}
+
+.congo-low-bandwidth .congo-loading-spinner {
+  animation: none;
+  border-top-color: var(--congo-primary, #3b82f6);
+}
